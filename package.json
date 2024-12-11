@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.13.2",
+  "scripts": {
+    "prepare": "husky",
+    "preview": "http-server -c-1"
+  },
+  "devDependencies": {
+    "ensure-license-notice": "^0.2.0",
+    "http-server": "^14.1.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.2.4"
+  },
+  "lint-staged": {
+    "*": [
+      "ensure-license-notice"
+    ],
+    "*.{html,json,ts}": [
+      "prettier --write"
+    ]
+  }
+}
