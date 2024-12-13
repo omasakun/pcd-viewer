@@ -73,21 +73,42 @@
       import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
       import { Pane } from 'tweakpane'
 
-      let scene, camera, renderer, controls, dropZone, material, pane
+      let scene, camera, renderer, controls, material, dropZone, pane
+
+      const params = { size: 50.0, background: '#000000', nearClip: 0.1, fov: 75 }
 
       function init() {
         scene = new THREE.Scene()
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+        camera = new THREE.PerspectiveCamera(
+          params.fov,
+          window.innerWidth / window.innerHeight,
+          params.nearClip,
+          10000,
+        )
         camera.position.z = 5
 
         renderer = new THREE.WebGLRenderer({ antialias: true })
         renderer.setPixelRatio(window.devicePixelRatio)
         renderer.setSize(window.innerWidth, window.innerHeight)
+        renderer.setClearColor(params.background)
         document.getElementById('viewer').appendChild(renderer.domElement)
 
         controls = new OrbitControls(camera, renderer.domElement)
         controls.enableDamping = true
         controls.dampingFactor = 0.25
+
+        // https://threejs.org/docs/#api/en/materials/PointsMaterial
+        material = new THREE.PointsMaterial({
+          size: params.size * 0.001,
+          sizeAttenuation: true,
+          map: new THREE.TextureLoader().load(
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAAZiS0dEAAAAAAAA+UO7fwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sHDgwCEMBJZu0AAAAdaVRYdENvbW1lbnQAAAAAAENyZWF0ZWQgd2l0aCBHSU1QZC5lBwAABM5JREFUWMO1V0tPG2cUPZ4Hxh6DazIOrjFNqJs0FIMqWFgWQkatsmvVbtggKlSVRVf5AWz4AWz4AUSKEChll19QJYSXkECuhFxsHjEhxCYm+DWGMZ5HF72DJq4bAzFXurI0M/I5997v3u9cC65vTJVn2lX/xHINQOYSBLTLEuIuCWw4Z3IGAEvf6ASmVHjNzHCXBG4A0AjACsAOwEbO0nsFQBnAGYASAIl+ZRMR7SolMEdsByD09fV5R0ZGgg8ePPjW5/N1iqLYpuu6RZblciKR2I9Go69evnwZnZ+fjwI4IS8AKBIRzeQfJWCANwKwh0KhtrGxsYehUOin1tbW+zzP23ietzY2NnIAoGmaLsuyUiqVyvl8XtrY2NiamZn589mzZxsAUgCOAeQAnFI2tI+VxIjaAeDzoaGh7xYWFuZOTk6OZVk+12uYqqq6JEnn0Wg0OT4+/geAXwGEAdwDIFJQXC1wO4DWR48e/RCPxxclSSroVzRFUbSDg4P848ePFwH8DuAhkWih83TRQWxFOXgAwvDwcOfo6OhvXV1d39tsNtuVBwTDWBwOh1UUxVsMw1hXVlbSdCgNV43uYSvrHg6H24aHh38eHBz85TrgF9FYLHA4HLzH43FvbW2d7u/vG+dANp8FpqIlbd3d3V8Fg8EfBUFw4BONZVmL3+9vHhkZCQL4AoAHgJPK8G+yzC0XDofdoVAo5PP5vkadTBAEtr+/39ff3x8gAp/RPOEqx2qjx+NpvXv3bk9DQ0NDvQgwDIOWlhZrMBj8kgi0UJdxRgYMArzL5XJ7vd57qLPZ7Xamp6fnNgBXtQxcjFuHw+Hyer3t9SYgCAITCAScAJoBNNEY/08GOFVVrfVMv7kMNDntFD1vjIAPrlRN0xjckOm6biFQ3jwNPwDMZrOnqVTqfb3Bi8Wivru7W/VCYkwPlKOjo0IikXh7EwQikYgE4Nw0CfXKDCipVCoTj8df3QABbW1tLUc6oUgkFPMkVACUNjc337148eKvw8PDbJ2jP1taWkoCyNDVXDSECmNSK4qiKNLq6urW8+fPI/UicHx8rD59+jSVy+WOAKSJhKENwFItLtoxk8mwsixzHR0dHe3t7c5PAU+n09rs7OzJkydPYqVSaQfANoDXALIk31S2smU1TWMPDg7K5XKZ7+3t9TudTut1U7+wsFCcmJiIpdPpbQBxADsAknQWymYCOukBHYCuKApisdhpMpnURFEU79y503TVyKenpzOTk5M7e3t7MQKPV0Zv1gNm+awB0MvlshqLxfLb29uyJElWURSbXC4XXyvqxcXFs6mpqeTc3Nzu3t7e3wQcA7BPZ8Cov1pNlJplmQtAG8MwHV6v95tAINA5MDBwPxAIuLu6upr8fr/VAN3c3JQjkcjZ+vp6fnl5+d2bN29SuVzuNYAEpf01CdRChUL+X1VskHACuA3Ay3Fcu9vt7nA6nZ7m5uYWQRCaNE3jVVW15PP580KhIGUymWw2m00DOAJwSP4WwPtq4LX2Ao6USxNlQyS/RcQcdLGwlNIz6vEMAaZpNzCk2Pll94LK/cDYimxERiBwG10sxjgvEZBE0UpE6vxj+0Ct5bTaXthgEhRmja8QWNkkPGsuIpfdjpkK+cZUWTC0KredVmtD/gdlSl6EG4AMvQAAAABJRU5ErkJggg==',
+          ),
+          alphaTest: 0.5,
+          transparent: true,
+          vertexColors: true,
+        })
+        console.log({ material })
 
         dropZone = document.getElementById('drop-zone')
         window.addEventListener('resize', onWindowResize, false)
@@ -98,11 +119,20 @@
         fileInput.addEventListener('change', onFileSelected, false)
 
         pane = new Pane()
-        const params = { pointSize: 0.5 }
-        pane.addBinding(params, 'pointSize', { min: 0.1, max: 10 }).on('change', (e) => {
-          if (material) {
-            material.size = e.value * 0.01
-          }
+        pane.hidden = true
+        pane.addBinding(params, 'size', { min: 0.1, max: 100 }).on('change', (e) => {
+          material.size = e.value * 0.001
+        })
+        pane.addBinding(params, 'background').on('change', (e) => {
+          renderer.setClearColor(e.value)
+        })
+        pane.addBinding(params, 'nearClip', { min: 0.01, max: 0.1 }).on('change', (e) => {
+          camera.near = e.value
+          camera.updateProjectionMatrix()
+        })
+        pane.addBinding(params, 'fov', { min: 1, max: 180 }).on('change', (e) => {
+          camera.fov = e.value
+          camera.updateProjectionMatrix()
         })
 
         animate()
@@ -138,14 +168,14 @@
       function onFileReceived(file) {
         dropZone.classList.remove('active')
         dropZone.classList.add('hidden')
+        pane.hidden = false
 
         const reader = new FileReader()
         reader.onload = function (e) {
           const contents = e.target.result
           const loader = new PCDLoader()
           const object = loader.parse(contents)
-          material = object.material
-          console.log(material)
+          object.material = material
           scene.add(object)
         }
         reader.readAsArrayBuffer(file)
