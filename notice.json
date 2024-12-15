@@ -13,6 +13,7 @@
     ".json",
     ".md",
     ".npmrc",
+    ".pcd",
     ".prettierrc",
     ".toml",
     ".tool-versions",

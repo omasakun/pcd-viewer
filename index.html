@@ -75,7 +75,7 @@
 
       let scene, camera, renderer, controls, material, dropZone, pane
 
-      const params = { size: 50.0, background: '#000000', nearClip: 0.1, fov: 75 }
+      const params = { size: 50.0, background: '#000000', nearClip: 0.01, fov: 75 }
 
       function init() {
         scene = new THREE.Scene()
@@ -117,6 +117,8 @@
 
         const fileInput = document.getElementById('file-input')
         fileInput.addEventListener('change', onFileSelected, false)
+
+        document.getElementById('load-example').addEventListener('click', loadExamplePCD)
 
         pane = new Pane()
         pane.hidden = true
@@ -167,18 +169,27 @@
 
       function onFileReceived(file) {
         dropZone.classList.remove('active')
-        dropZone.classList.add('hidden')
-        pane.hidden = false
-
         const reader = new FileReader()
         reader.onload = function (e) {
-          const contents = e.target.result
-          const loader = new PCDLoader()
-          const object = loader.parse(contents)
-          object.material = material
-          scene.add(object)
+          onDataLoaded(e.target.result)
         }
         reader.readAsArrayBuffer(file)
+      }
+
+      function loadExamplePCD() {
+        fetch(new URL('example.pcd', location))
+          .then((response) => response.arrayBuffer())
+          .then(onDataLoaded)
+          .catch((error) => console.error('Error loading example PCD:', error))
+      }
+
+      function onDataLoaded(data) {
+        const loader = new PCDLoader()
+        const object = loader.parse(data)
+        object.material = material
+        scene.add(object)
+        dropZone.classList.add('hidden')
+        pane.hidden = false
       }
 
       function animate() {
@@ -197,6 +208,7 @@
       <div>Drag and drop a PCD file or click the button below.</div>
       <input type="file" id="file-input" accept=".pcd" />
       <button onclick="document.getElementById('file-input').click()">Select PCD file</button>
+      <button id="load-example">Load Example PCD</button>
       <a href="https://github.com/omasakun/pcd-viewer" target="_blank">GitHub</a>
     </div>
   </body>
