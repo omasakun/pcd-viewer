@@ -168,7 +168,7 @@
       }
 
       function onFileReceived(file) {
-        dropZone.classList.remove('active')
+        onLoadStarted()
         const reader = new FileReader()
         reader.onload = function (e) {
           onDataLoaded(e.target.result)
@@ -177,10 +177,17 @@
       }
 
       function loadExamplePCD() {
+        onLoadStarted()
         fetch(new URL('example.pcd', location))
           .then((response) => response.arrayBuffer())
           .then(onDataLoaded)
           .catch((error) => console.error('Error loading example PCD:', error))
+      }
+
+      function onLoadStarted() {
+        dropZone.classList.remove('active')
+        dropZone.classList.add('hidden')
+        pane.hidden = false
       }
 
       function onDataLoaded(data) {
@@ -188,8 +195,6 @@
         const object = loader.parse(data)
         object.material = material
         scene.add(object)
-        dropZone.classList.add('hidden')
-        pane.hidden = false
       }
 
       function animate() {
